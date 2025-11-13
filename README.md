@@ -84,6 +84,7 @@ npm test
 ```
 
 Cobertura:
+
 - AuthService (registro, login)
 - TransactionsService (depósito, transferência, reversão)
 
@@ -94,6 +95,7 @@ npm run test:e2e
 ```
 
 Testa fluxo completo:
+
 - Registro → Login → Depósito → Transferência → Reversão
 
 ## 📝 Observabilidade
@@ -102,6 +104,32 @@ Testa fluxo completo:
 - Logging interceptor global
 - Exception filter com logs estruturados
 - Logs de transações importantes
+
+## 🐳 Banco de Dados (Docker)
+
+Este projeto utiliza Docker Compose para gerenciar o banco de dados PostgreSQL.
+
+```bash
+# Subir PostgreSQL
+docker compose up -d database
+
+# Ver logs
+docker compose logs -f database
+
+# Parar
+docker compose down
+
+# Parar e remover volumes (CUIDADO: apaga dados)
+docker compose down -v
+```
+
+O banco de dados estará disponível em:
+
+- **Host**: `localhost`
+- **Porta**: `5435`
+- **Database**: `carteira_digital`
+- **User**: `postgres`
+- **Password**: `postgres`
 
 ## 🚀 Comandos
 
@@ -130,6 +158,7 @@ npm run prisma:seed
 
 ```
 backend/
+├── docker-compose.yml         # Configuração Docker para PostgreSQL
 ├── prisma/
 │   ├── schema.prisma          # Schema do banco
 │   ├── migrations/            # Migrations SQL
@@ -144,6 +173,15 @@ backend/
 └── test/
     └── app.e2e-spec.ts        # Testes E2E
 ```
+
+## 🔗 Frontend
+
+Este backend foi desenvolvido para trabalhar em conjunto com o frontend Next.js.
+
+O frontend deve estar configurado para apontar para:
+
+- **URL da API**: `http://localhost:3001/api`
+- **Variável de ambiente**: `NEXT_PUBLIC_API_URL`
 
 ## 🔗 Endpoints
 
@@ -161,13 +199,63 @@ backend/
 - `GET /api/transactions/history` - Histórico
 - `GET /api/transactions/balance` - Saldo
 
+## 🚀 Como Executar
+
+### Pré-requisitos
+
+- Docker e Docker Compose
+- Node.js 18+
+- npm
+
+### 1. Configurar Variáveis de Ambiente
+
+```bash
+cp env.example .env
+# Edite .env - IMPORTANTE: Configure JWT_SECRET forte!
+```
+
+**Variáveis obrigatórias:**
+
+- `DATABASE_URL` - URL de conexão PostgreSQL (padrão: `postgresql://postgres:postgres@localhost:5435/carteira_digital?schema=public`)
+- `JWT_SECRET` - Secret para assinatura JWT (use um valor forte!)
+- `PORT` - Porta da aplicação (padrão: 3001)
+
+### 2. Subir Banco de Dados
+
+```bash
+docker compose up -d database
+```
+
+### 3. Instalar Dependências e Configurar
+
+```bash
+# Instalar dependências
+npm install
+
+# Gerar Prisma Client
+npx prisma generate
+
+# Executar migrations
+npx prisma migrate dev
+
+# Popular banco com dados de teste (opcional)
+npm run prisma:seed
+```
+
+### 4. Iniciar Aplicação
+
+```bash
+npm run start:dev
+```
+
+A API estará disponível em: **http://localhost:3001/api**
+
 ## 🔧 Variáveis de Ambiente
 
 Veja `env.example` para todas as variáveis necessárias.
 
 **Obrigatórias:**
+
 - `DATABASE_URL` - URL de conexão PostgreSQL
 - `JWT_SECRET` - Secret para assinatura JWT
 - `PORT` - Porta da aplicação (padrão: 3001)
-
-
