@@ -47,3 +47,6 @@ coverage/
 *.tsbuildinfo
 **/*.tsbuildinfo
 
+# Docker
+docker-compose.override.yml
+
