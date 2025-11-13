@@ -1,0 +1,84 @@
+// Prisma Schema para Carteira Digital
+// Gerador de client TypeScript
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Configuração do banco de dados PostgreSQL
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String   @db.VarChar(100)
+  email     String   @unique @db.VarChar(100)
+  password  String
+  cpf       String   @unique @db.VarChar(11)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relacionamento 1:1 com Wallet
+  wallet Wallet?
+
+  @@map("users")
+}
+
+model Wallet {
+  id        String   @id @default(uuid())
+  balance   Decimal  @default(0) @db.Decimal(10, 2)
+  userId    String   @unique @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relacionamento com User
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Relacionamento com Transactions (origem)
+  transactionsFrom Transaction[] @relation("FromWallet")
+
+  // Relacionamento com Transactions (destino)
+  transactionsTo Transaction[] @relation("ToWallet")
+
+  @@map("wallets")
+}
+
+enum TransactionType {
+  DEPOSIT
+  TRANSFER
+  REVERSAL
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  REVERSED
+  FAILED
+}
+
+// Modelo Transaction - Transação financeira
+model Transaction {
+  id          String            @id @default(uuid())
+  type        TransactionType
+  amount      Decimal           @db.Decimal(10, 2)
+  status      TransactionStatus @default(PENDING)
+  description String?           @db.Text
+  
+  // Carteira de origem (nullable para depósitos)
+  fromWalletId String? @map("from_wallet_id")
+  fromWallet   Wallet? @relation("FromWallet", fields: [fromWalletId], references: [id])
+
+  // Carteira de destino (sempre presente)
+  toWalletId String @map("to_wallet_id")
+  toWallet   Wallet @relation("ToWallet", fields: [toWalletId], references: [id])
+
+  // Referência para transação revertida
+  reversedTransactionId String? @map("reversed_transaction_id")
+
+  createdAt   DateTime  @default(now()) @map("created_at")
+  processedAt DateTime? @map("processed_at")
+
+  @@map("transactions")
+}
+
