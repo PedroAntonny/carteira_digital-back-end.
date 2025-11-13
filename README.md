@@ -1,0 +1,173 @@
+# 🔧 Backend - Carteira Digital
+
+API REST desenvolvida com Nest.js, Prisma e PostgreSQL.
+
+## 🛠️ Stack Tecnológica
+
+- **Nest.js 10**: Framework Node.js com TypeScript
+- **Prisma ORM**: ORM type-safe para PostgreSQL
+- **PostgreSQL**: Banco de dados relacional
+- **JWT**: Autenticação stateless
+- **bcrypt**: Hash de senhas
+- **class-validator**: Validação de DTOs
+- **Passport**: Estratégias de autenticação
+
+## 🏗️ Arquitetura
+
+### Estrutura em Camadas
+
+```
+Controllers → Services → Prisma Service → Database
+```
+
+### Módulos
+
+- **AuthModule**: Autenticação e autorização
+- **TransactionsModule**: Operações financeiras
+- **PrismaModule**: Acesso ao banco de dados
+
+### Design Patterns
+
+- **Repository Pattern**: PrismaService encapsula acesso ao banco
+- **Strategy Pattern**: JWT Strategy do Passport
+- **Dependency Injection**: Nest.js DI container
+- **DTO Pattern**: Validação de dados de entrada
+- **Guard Pattern**: Proteção de rotas
+
+### Princípios SOLID
+
+- **S**ingle Responsibility: Cada service tem uma responsabilidade
+- **O**pen/Closed: Extensível via interfaces
+- **L**iskov Substitution: Interfaces bem definidas
+- **I**nterface Segregation: Interfaces específicas
+- **D**ependency Inversion: Dependências injetadas
+
+## 📊 Modelagem de Dados
+
+### Schema Prisma
+
+```prisma
+User (1) ─── (1) Wallet
+              │
+              ├── (N) Transactions (to)
+              └── (N) Transactions (from)
+```
+
+### Entidades
+
+- **User**: Usuários do sistema
+- **Wallet**: Carteira financeira (1:1 com User)
+- **Transaction**: Transações financeiras (DEPOSIT, TRANSFER, REVERSAL)
+
+### Decisões
+
+- **UUID** como Primary Key (segurança)
+- **Decimal** para valores monetários (precisão)
+- **Enums** para tipos e status (type-safety)
+- **Timestamps** automáticos (auditoria)
+
+## 🔒 Segurança
+
+- Senhas hasheadas com bcrypt (salt rounds = 10)
+- JWT com secret configurável
+- Validação de DTOs em todas as entradas
+- Guards protegendo rotas sensíveis
+- Transações ACID para consistência
+- Validação de CPF
+
+## 🧪 Testes
+
+### Unitários
+
+```bash
+npm test
+```
+
+Cobertura:
+- AuthService (registro, login)
+- TransactionsService (depósito, transferência, reversão)
+
+### Integração (E2E)
+
+```bash
+npm run test:e2e
+```
+
+Testa fluxo completo:
+- Registro → Login → Depósito → Transferência → Reversão
+
+## 📝 Observabilidade
+
+- Logger do Nest.js em todos os services
+- Logging interceptor global
+- Exception filter com logs estruturados
+- Logs de transações importantes
+
+## 🚀 Comandos
+
+```bash
+# Desenvolvimento
+npm run start:dev
+
+# Build
+npm run build
+
+# Produção
+npm run start:prod
+
+# Testes
+npm test
+npm run test:e2e
+
+# Prisma
+npx prisma generate
+npx prisma migrate dev
+npx prisma studio
+npm run prisma:seed
+```
+
+## 📚 Estrutura de Arquivos
+
+```
+backend/
+├── prisma/
+│   ├── schema.prisma          # Schema do banco
+│   ├── migrations/            # Migrations SQL
+│   └── seed.ts                # Seed de dados
+├── src/
+│   ├── auth/                  # Módulo de autenticação
+│   ├── transactions/          # Módulo de transações
+│   ├── prisma/                # PrismaService
+│   ├── common/                # Filtros, interceptors, validators
+│   ├── app.module.ts          # Módulo raiz
+│   └── main.ts                # Bootstrap
+└── test/
+    └── app.e2e-spec.ts        # Testes E2E
+```
+
+## 🔗 Endpoints
+
+### Autenticação
+
+- `POST /api/auth/register` - Cadastro
+- `POST /api/auth/login` - Login
+- `GET /api/auth/profile` - Perfil (autenticado)
+
+### Transações (Autenticadas)
+
+- `POST /api/transactions/deposit` - Depósito
+- `POST /api/transactions/transfer` - Transferência
+- `POST /api/transactions/:id/reverse` - Reversão
+- `GET /api/transactions/history` - Histórico
+- `GET /api/transactions/balance` - Saldo
+
+## 🔧 Variáveis de Ambiente
+
+Veja `env.example` para todas as variáveis necessárias.
+
+**Obrigatórias:**
+- `DATABASE_URL` - URL de conexão PostgreSQL
+- `JWT_SECRET` - Secret para assinatura JWT
+- `PORT` - Porta da aplicação (padrão: 3001)
+
+
